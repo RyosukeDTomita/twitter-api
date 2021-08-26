@@ -14,6 +14,7 @@ import json
 import time
 import random
 import argparse
+import shutil
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -66,23 +67,27 @@ def fetch_user_timeline(url,payload,headers):
     return json_res['data']
 
 
-def save_file(followers_json):
+def save_file(tweet_json):
     save_file = (user_id + '_' + 'timeline_data.csv')
     with open('timeline_data.csv',mode="a") as f: #"a"でテキストの追記
-        [f.write("{},{}\n".format(j['id'],j['text'])) for i in followers_json for j in i]
+        f.write("{},{}\n".format(tweet_json['id'],tweet_json['text']))
 
 
 def keep_monitoring(url,payload,headers):
     id_list = []
     while True:
-        timeline_json = fetch_user_timeline(url,payload,headers)
-        for t in timeline_json:
+        print("-----Scanning Target Tweet.-----")
+        new_tweets_json = fetch_user_timeline(url,payload,headers)
+        for t in new_tweets_json:
             if t['id'] not in id_list:
                 id_list.append(t['id'])
-                print(t['text'])
+                print("{}\n{}".format(t['text'],
+                          "="*shutil.get_terminal_size().columns))
                 save_file(t)
+            else:
+                print("-----No new Tweet-----")
 
-        print("-----Waiting to next scan------")
+        print("-----Next Scan is 60s later.------")
         time.sleep(60)
 
 def main():
