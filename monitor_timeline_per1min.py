@@ -69,7 +69,7 @@ def fetch_user_timeline(url,payload,headers):
 
 def save_file(tweet_json):
     save_file = (user_id + '_' + 'timeline_data.csv')
-    with open('timeline_data.csv',mode="a") as f: #"a"でテキストの追記
+    with open(save_file,mode="a") as f: #"a"でテキストの追記
         f.write("{},{}\n".format(tweet_json['id'],tweet_json['text']))
 
 
@@ -78,14 +78,17 @@ def keep_monitoring(url,payload,headers):
     while True:
         print("-----Scanning Target Tweet.-----")
         new_tweets_json = fetch_user_timeline(url,payload,headers)
+        newTweetExist = False
+
         for t in new_tweets_json:
             if t['id'] not in id_list:
                 id_list.append(t['id'])
                 print("{}\n{}".format(t['text'],
                           "="*shutil.get_terminal_size().columns))
                 save_file(t)
-            else:
-                print("-----No new Tweet-----")
+                newTweetExist = True
+
+        if not newTweetExist: print("-----No new Tweet------")
 
         print("-----Next Scan is 60s later.------")
         time.sleep(60)
@@ -101,7 +104,6 @@ def main():
     headers = create_headers(bearer_token)
 
     keep_monitoring(url,payload,headers)
-#    timeline_json = fetch_user_timeline(url,payload,headers)
 
 
 
