@@ -13,6 +13,7 @@ import os
 import json
 import random
 import argparse
+import time
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -31,13 +32,13 @@ def create_url(user_id):
 
 
 def create_params():
-    return {"user.fields": "created_at",'max_results': '1000'}
+    return {"user.fields": "created_at",
+            "max_results": "1000"}
 
 
 def create_headers(bearer_token):
     headers = {"Authorization": "Bearer {}".format(bearer_token),
                "User-Agent": select_user_agent()}
-    #headers = {"Authorization": "Bearer {}".format(bearer_token)}
     return headers
 
 def select_user_agent():
@@ -53,28 +54,42 @@ def select_user_agent():
     return(random_user_agent)
 
 
-def fetch_followers_data(url,payload,headers):
-    followers_json = []
-    response = requests.get(url,params=payload,headers=headers)
-    json_res = response.json()
+def save_file(followers_json,user_id):
+    save_file = (user_id + '_' + 'followers_data.csv')
+    with open(save_file,mode="a") as f:
+        [f.write("{},{},{}\n".format(j['name'],j['id'],j['username'])) for i in followers_json for j in i]
 
-    if response.status_code != 200:
-        raise Exception(
-            "Request returned an error: {} {}".format(
-                response.status_code, response.text
+
+def fetch_followers_data(url,payload,headers):
+    cnt = 0
+    while True:
+        followers_json = []
+        response = requests.get(url,params=payload,headers=headers)
+        json_res = response.json()
+
+        if response.status_code != 200:
+            raise Exception(
+                "Request returned an error: {} {}".format(
+                    response.status_code, response.text
+                )
             )
-        )
-    followers_json.append(json_res['data'])
+
+        followers_json.append((json_res['data']))
+        payload.update(pagination_token=json_res['meta']['next_token'])
+        print(json_res['meta']['next_token'])
+        save_file(followers_json,user_id)
+        cnt += 1
+        if cnt == 15:
+            time.sleep(60*15)
+            cnt = 0
+
     return followers_json
 
 
-def save_file(followers_json,user_id):
-    save_file = (user_id + '_' + 'followers_data.csv')
-    with open(save_file,mode="w") as f:
-        [f.write("{},{},{}\n".format(j['name'],j['id'],j['username'])) for i in followers_json for j in i]
 
 def main():
     args = parse_args()
+    global user_id
     user_id = args['userid']
 
     bearer_token = load_bearer_token()
@@ -84,7 +99,6 @@ def main():
 
     followers_json = fetch_followers_data(url,payload,headers)
 
-    save_file(followers_json,user_id)
 
 
 if __name__ == "__main__":
