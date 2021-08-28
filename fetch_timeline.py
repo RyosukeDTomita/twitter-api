@@ -28,7 +28,9 @@ def load_bearer_token():
 
 
 def create_url(user_id):
-    return "https://api.twitter.com/2/users/{}/tweets".format(user_id)
+    url_tweets = "https://api.twitter.com/2/users/{}/tweets".format(user_id)
+    url_mensions = "https://api.twitter.com/2/users/{}/mentions".format(user_id)
+    return url_tweets,url_mensions
 
 
 def create_params():
@@ -65,13 +67,12 @@ def fetch_user_timeline(url,payload,headers):
             )
         )
     timeline_json.append(json_res['data'])
-    #print(json_res['data'])
     return timeline_json
 
 
 def save_file(followers_json,user_id):
     save_file = (user_id + '_' + 'timeline_data.csv')
-    with open(save_file,mode="w") as f:
+    with open(save_file,mode="a") as f:
         [f.write("{},{}\n".format(j['id'],j['text'])) for i in followers_json for j in i]
 
 
@@ -80,13 +81,15 @@ def main():
     user_id = args['userid']
 
     bearer_token = load_bearer_token()
-    url = create_url(user_id)
+    url_tweets,url_mensions = create_url(user_id)
     payload = create_params()
     headers = create_headers(bearer_token)
 
-    timeline_json = fetch_user_timeline(url,payload,headers)
-
+    timeline_json = fetch_user_timeline(url_tweets,payload,headers)
     save_file(timeline_json,user_id)
+
+    mentions_json = fetch_user_timeline(url_mensions,payload,headers)
+    save_file(mentions_json,user_id)
 
 
 if __name__ == "__main__":
