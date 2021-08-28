@@ -29,7 +29,9 @@ def load_bearer_token():
 
 
 def create_url(user_id):
-    return "https://api.twitter.com/2/users/{}/tweets".format(user_id)
+    url_tweets = "https://api.twitter.com/2/users/{}/tweets".format(user_id)
+    url_mensions = "https://api.twitter.com/2/users/{}/mentions".format(user_id)
+    return url_tweets,url_mensions
 
 
 def create_params():
@@ -99,12 +101,12 @@ def main():
     user_id = args['userid']
 
     bearer_token = load_bearer_token()
-    url = create_url(user_id)
+    url_tweets,url_mensions = create_url(user_id)
     payload = create_params()
     headers = create_headers(bearer_token)
 
-    keep_monitoring(url,payload,headers)
-
+    keep_monitoring(url_tweets,payload,headers)
+    #keep_monitoring(url_mensions,payload,headers)
 
 
 if __name__ == "__main__":
