@@ -31,8 +31,8 @@ def load_bearer_token():
 
 
 def read_csv(csvfile):
-    df = pd.read_csv(csvfile,header=0,encoding="utf-8",
-                     usecols=(0,1,2),names=('name','id','username'))
+    df = pd.read_csv(csvfile,usecols=(0,1,2),header=0,encoding="utf-8")
+    print(df)
     return df
 
 
@@ -90,7 +90,6 @@ def main():
             continue
 
         img_dl(icon_src,df['username'][i],df['id'][i])
-
 
 
 if __name__ == "__main__":
