@@ -4,7 +4,8 @@ Using twitter api, get twitter data.
 - [ABOUT](#ABOUT)
 - [ENVIRONMENT](#ABOUT)
 - [PREPARING](#PREPARING)
-- [EXAMPLES](#EXAMPLES)
+- [HOW TO USE](#HOW TO USE)
+- [REFERENCE(#REFERENCE)]
 
 # ABOUT
 These programs need twitter api BEARER_TOKEN.
@@ -27,7 +28,7 @@ export CONSUMER_SECRET=<YOUR_CONSUMER_SECRET>
 export BEARER_TOKEN=<YOUR_BEARER_TOKEN>
 ```
 
-# EXAMPLE
+# HOW TO USE
 ## fetching selected user's followers data and save to text file.
 
 ```shell
@@ -47,3 +48,20 @@ If found new tweet then save to text file.
 ```shell
 python3 monitor_timeline_per1min.py -i <user_id>
 ```
+
+## compare followerslist.csv and find common user.
+
+```shell
+python3 find_commonuser.py -f <csv1> -f <csv2>
+```
+
+## fetch followerlist.csv's icon image.
+
+```shell
+python3 fetch_follower_icon.py -f <csv>
+```
+******
+
+
+# REFERENCE
+- If you get rate-limit error(429),see [rate-limit](https://developer.twitter.com/en/docs/twitter-api/v1/rate-limits).
