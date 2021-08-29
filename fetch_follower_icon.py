@@ -16,6 +16,7 @@ import random
 import argparse
 import time
 import pandas as pd
+import numpy as np
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -31,8 +32,16 @@ def load_bearer_token():
 
 
 def read_csv(csvfile):
-    df = pd.read_csv(csvfile,usecols=(0,1,2),header=0,encoding="utf-8")
-    print(df)
+    df = pd.read_csv(csvfile,header=0,encoding="utf-8",
+                     usecols=(0,1,2),
+                     names=('name','id','username'))
+
+    with open(csvfile,mode='r') as f:
+        user_id_list = []
+        for i in range(len(df)):
+            user_id_list.append(f.readline().split(',')[1])
+
+    df['id'] = user_id_list
     return df
 
 
@@ -65,7 +74,7 @@ def fetch_followers_data(url,payload,headers):
 
 def img_dl(icon_scr,username,userid):
     img = requests.get(icon_scr).content
-    imgName = (username + userid + "jpg")
+    imgName = (username + str(userid) + "jpg")
     DIRPATH = join(abspath(dirname(__file__)) + "/icon/")
     with open((DIRPATH+imgName),"wb") as f:
         f.write(img)
@@ -80,8 +89,10 @@ def main():
     bearer_token = load_bearer_token()
     headers = create_headers(bearer_token)
 
-    for i,user in enumerate(df['id']):
-        payload = create_params(user)
+    for i,user_id in enumerate(df['id']):
+        if not user_id: continue
+        print(user_id)
+        payload = create_params(user_id)
         user_object_json = fetch_followers_data(url,payload,headers)
         if i+1%300 == 0 and i != 0: time.sleep(60*15)
         try:
