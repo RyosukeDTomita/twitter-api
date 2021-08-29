@@ -65,3 +65,4 @@ python3 fetch_follower_icon.py -f <csv>
 
 # REFERENCE
 - If you get rate-limit error(429),see [rate-limit](https://developer.twitter.com/en/docs/twitter-api/v1/rate-limits).
+- [Developer terms](https://developer.twitter.com/en/developer-terms/more-on-restricted-use-cases)
