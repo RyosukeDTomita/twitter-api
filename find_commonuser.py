@@ -34,6 +34,7 @@ def find_min_file(df_list):
             min_df = df
     return min_df
 
+
 def find_common_user(df_list,min_df):
     min_userid_set = set(min_df['id'])
     common_user_list = []
@@ -53,7 +54,7 @@ def find_common_user(df_list,min_df):
 
 
 def save_file(common_user):
-    common_user.to_csv('test.csv',columns=['name','id','username'],
+    common_user.to_csv('common_user.csv',columns=['name','id','username'],
                        index=False)
     return None
 

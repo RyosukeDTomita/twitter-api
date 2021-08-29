@@ -10,6 +10,7 @@
 ##########################################################################
 import requests
 import os
+from os.path import join,abspath,dirname
 import json
 import random
 import argparse
@@ -52,33 +53,43 @@ def save_file(followers_json,user_id):
 
 
 def fetch_followers_data(url,payload,headers):
-    response = requests.get(url,params=payload,headers=headers)
+    response = requests.get(url,params=payload,headers=headers,
+                            timeout=3)
     json_res = response.json()
-
     if response.status_code != 200:
-        raise Exception(
-            "Request returned an error: {} {}".format(
-                response.status_code, response.text
-            )
-        )
+        print("Request returned an error: {} {}".format(
+              response.status_code, response.text))
+
     return json_res
 
 
+def img_dl(icon_scr,username,userid):
+    img = requests.get(icon_scr).content
+    imgName = (username + userid + "jpg")
+    DIRPATH = join(abspath(dirname(__file__)) + "/icon/")
+    with open((DIRPATH+imgName),"wb") as f:
+        f.write(img)
+
 def main():
-    #args = parse_args()
+    args = parse_args()
 
+    csv_file = args['file']
+    df = read_csv(csv_file)
+
+    url = 'https://api.twitter.com/1.1/users/show.json'
     bearer_token = load_bearer_token()
-
-    #csv_file = args['file']
-    #df = read_csv(csv_file)
-
     headers = create_headers(bearer_token)
 
-    user_id = 1283398760156893184
-    url = 'https://api.twitter.com/1.1/users/show.json'
-    payload = create_params(user_id)
-    user_object_json = fetch_followers_data(url,payload,headers)
-    print(user_object_json['profile_image_url'])
+    for i,user in enumerate(df['id']):
+        payload = create_params(user)
+        user_object_json = fetch_followers_data(url,payload,headers)
+        if i+1%300 == 0 and i != 0: time.sleep(60*15)
+        try:
+            icon_src = user_object_json['profile_image_url']
+        except KeyError:
+            continue
+
+        img_dl(icon_src,df['username'][i],df['id'][i])
 
 
 
