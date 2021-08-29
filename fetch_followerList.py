@@ -57,7 +57,7 @@ def select_user_agent():
 def save_file(followers_json,user_id):
     save_file = (user_id + '_' + 'followers_data.csv')
     with open(save_file,mode="a") as f:
-        [f.write("{},{},{}\n".format(j['name'],j['id'],j['username'])) for i in followers_json for j in i]
+        [f.write("{0},{1},{2},https://twitter.com/intent/user?user_id={1}\n".format(j['name'],j['id'],j['username'])) for i in followers_json for j in i]
 
 
 def fetch_followers_data(url,payload,headers):

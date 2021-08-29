@@ -59,7 +59,7 @@ def select_user_agent():
 def save_file(liked_tweets_json,user_id):
     save_file = (user_id + '_' + 'liked_tweets.csv')
     with open(save_file,mode="a") as f:
-        [f.write("{},{},{}".format(j['text'],j['id'],j['author_id'])) for i in liked_tweets_json for j in i]
+        [f.write("{0},{1},{2},https://twitter.com/{2}/status/{1}".format(j['text'],j['id'],j['author_id'])) for i in liked_tweets_json for j in i]
 
 
 def fetch_liked_tweets(url,payload,headers):

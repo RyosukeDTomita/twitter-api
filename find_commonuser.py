@@ -23,7 +23,7 @@ def parse_args():
 
 def read_csv(csvfile):
     df = pd.read_csv(csvfile,header=None,encoding="utf-8",
-                     usecols=(0,1,2),names=('name','id','username'))
+                     usecols=(0,1,2,3),names=('name','id','username','link'))
     return df
 
 
@@ -54,7 +54,8 @@ def find_common_user(df_list,min_df):
 
 
 def save_file(common_user):
-    common_user.to_csv('common_user.csv',columns=['name','id','username'],
+    common_user["link"] = ["https://twitter.com/intent/user?user_id={}".format(i) for i in common_user['id']]
+    common_user.to_csv('common_user.csv',columns=['name','id','username','link'],
                        index=False)
     return None
 
