@@ -64,7 +64,8 @@ def fetch_followers_data(url,payload,headers):
     cnt = 0
     while True:
         followers_json = []
-        response = requests.get(url,params=payload,headers=headers)
+        response = requests.get(url,
+                                params=payload,headers=headers)
         json_res = response.json()
 
         if response.status_code != 200:
@@ -75,13 +76,16 @@ def fetch_followers_data(url,payload,headers):
             )
 
         followers_json.append((json_res['data']))
-        payload.update(pagination_token=json_res['meta']['next_token'])
-        print(json_res['meta']['next_token'])
         save_file(followers_json,user_id)
-        cnt += 1
-        if cnt == 15:
-            time.sleep(60*15)
-            cnt = 0
+
+        if 'next_token' in json_res['meta']:
+            payload.update(pagination_token=json_res['meta']['next_token'])
+            cnt += 1
+            if cnt == 15:
+                time.sleep(60*15)
+                cnt = 0
+
+        else: break
 
     return followers_json
 
