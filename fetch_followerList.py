@@ -57,14 +57,15 @@ def select_user_agent():
 def save_file(followers_json,user_id):
     save_file = (user_id + '_' + 'followers_data.csv')
     with open(save_file,mode="a") as f:
-        [f.write("{},{},{}\n".format(j['name'],j['id'],j['username'])) for i in followers_json for j in i]
+        [f.write("{0},{1},{2},https://twitter.com/intent/user?user_id={1}\n".format(j['name'],j['id'],j['username'])) for i in followers_json for j in i]
 
 
 def fetch_followers_data(url,payload,headers):
     cnt = 0
     while True:
         followers_json = []
-        response = requests.get(url,params=payload,headers=headers)
+        response = requests.get(url,
+                                params=payload,headers=headers)
         json_res = response.json()
 
         if response.status_code != 200:
@@ -75,13 +76,16 @@ def fetch_followers_data(url,payload,headers):
             )
 
         followers_json.append((json_res['data']))
-        payload.update(pagination_token=json_res['meta']['next_token'])
-        print(json_res['meta']['next_token'])
         save_file(followers_json,user_id)
-        cnt += 1
-        if cnt == 15:
-            time.sleep(60*15)
-            cnt = 0
+
+        if 'next_token' in json_res['meta']:
+            payload.update(pagination_token=json_res['meta']['next_token'])
+            cnt += 1
+            if cnt == 15:
+                time.sleep(60*15)
+                cnt = 0
+
+        else: break
 
     return followers_json
 
