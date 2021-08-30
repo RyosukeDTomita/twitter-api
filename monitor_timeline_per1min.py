@@ -72,7 +72,7 @@ def fetch_user_timeline(url,payload,headers):
 def save_file(tweet_json):
     save_file = (user_id + '_' + 'timeline_data.csv')
     with open(save_file,mode="a") as f: # "a"でテキストの追記
-        f.write("{},{}\n".format(tweet_json['id'],tweet_json['text']))
+        f.write("{0},{1},https://twitter.com/{2}/status/{0}\n".format(tweet_json['id'],tweet_json['text'],user_id))
 
 
 def keep_monitoring(url,payload,headers):
