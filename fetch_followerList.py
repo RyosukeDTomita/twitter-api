@@ -78,7 +78,7 @@ def show_progress(max_data_size,fetched_data_size):
     bar_cnt = int(max_bar_length * progressed_percent)
     dot_cnt = max_bar_length - bar_cnt
     print('\033[32m',bar*bar_cnt + dot * dot_cnt,'\033[0m',
-          '\033[31m','[{:.2f}%]'.format(progressed_percent),
+          '\033[31m','[{:.1f}%]'.format(progressed_percent*100),
           '\033[0m')
     return None
 
@@ -89,8 +89,7 @@ def save_file(followers_json,user_id):
         [f.write("{0},{1},{2},https://twitter.com/intent/user?user_id={1}\n".format(j['name'].replace(',',''),j['id'],j['username'])) for i in followers_json for j in i]
 
 
-def fetch_followers_data(url,payload,headers):
-    fetched_followers = 0
+def fetch_followers_data(url,payload,headers,fetched_followers):
     followers_count = fetch_followers_count(headers)
 
     while True:
@@ -101,7 +100,8 @@ def fetch_followers_data(url,payload,headers):
             fetched_followers += 15000
             show_progress(followers_count,fetched_followers)
             time.sleep(60*15)
-            return fetch_followers_data(url,payload,headers)
+            return fetch_followers_data(url,payload,headers,
+                                        fetched_followers)
 
         json_res = response.json()
 
@@ -122,8 +122,7 @@ def fetch_followers_data(url,payload,headers):
 
         else: break
 
-    return followers_json
-
+    return None
 
 
 def main():
@@ -136,8 +135,7 @@ def main():
     payload = create_params()
     headers = create_headers(bearer_token)
 
-
-    followers_json = fetch_followers_data(url,payload,headers)
+    fetch_followers_data(url,payload,headers,fetched_followers=0)
 
     return None
 
