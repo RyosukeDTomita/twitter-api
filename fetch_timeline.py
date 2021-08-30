@@ -58,6 +58,9 @@ def select_user_agent():
 def fetch_user_timeline(url,payload,headers):
     timeline_json = []
     response = requests.get(url,params=payload,headers=headers)
+    if response.status_code == 429:
+        time.sleep(60*15)
+        return fetch_user_timeline(url,payload,headers)
     json_res = response.json()
 
     if response.status_code != 200:
@@ -66,7 +69,10 @@ def fetch_user_timeline(url,payload,headers):
                 response.status_code, response.text
             )
         )
-    timeline_json.append(json_res['data'])
+    try:
+        timeline_json.append(json_res['data'])
+    except: KeyError:
+        break
     return timeline_json
 
 
