@@ -65,6 +65,7 @@ def fetch_followers_data(url,payload,headers):
     response = requests.get(url,params=payload,headers=headers,
                             timeout=3)
     json_res = response.json()
+    print(json_res)
     if response.status_code != 200:
         print("Request returned an error: {} {}".format(
               response.status_code, response.text))
@@ -72,9 +73,9 @@ def fetch_followers_data(url,payload,headers):
     return json_res
 
 
-def img_dl(icon_scr,username,userid):
-    img = requests.get(icon_scr).content
-    imgName = (username + str(userid) + "jpg")
+def img_dl(icon_src,userid):
+    img = requests.get(icon_src).content
+    imgName = str(userid)
     DIRPATH = join(abspath(dirname(__file__)) + "/icon/")
     with open((DIRPATH+imgName),"wb") as f:
         f.write(img)
@@ -100,7 +101,7 @@ def main():
         except KeyError:
             continue
 
-        img_dl(icon_src,df['username'][i],df['id'][i])
+        img_dl(icon_src,df['id'][i])
 
 
 if __name__ == "__main__":
