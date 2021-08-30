@@ -14,6 +14,7 @@ import json
 import random
 import argparse
 import time
+import shutil
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -55,6 +56,33 @@ def select_user_agent():
     return(random_user_agent)
 
 
+def fetch_followers_count(headers):
+    params = {"user_id":user_id}
+    url = 'https://api.twitter.com/1.1/users/show.json'
+    response = requests.get(url,params=params,headers=headers,
+                            timeout=3)
+
+    followers_count = response.json()['followers_count']
+    screen_name = response.json()['screen_name']
+    print("{} has {} followers.".format(screen_name,followers_count))
+
+    return followers_count
+
+
+def show_progress(max_data_size,fetched_data_size):
+    terminal_size = shutil.get_terminal_size().columns
+    max_bar_length = terminal_size - 12
+
+    bar,dot = "#","."
+    progressed_percent = fetched_data_size/max_data_size
+    bar_cnt = int(max_bar_length * progressed_percent)
+    dot_cnt = max_bar_length - bar_cnt
+    print('\033[32m',bar*bar_cnt + dot * dot_cnt,'\033[0m',
+          '\033[31m','[{:.2f}%]'.format(progressed_percent),
+          '\033[0m')
+    return None
+
+
 def save_file(followers_json,user_id):
     save_file = (user_id + '_' + 'followers_data.csv')
     with open(save_file,mode="a") as f:
@@ -62,12 +90,16 @@ def save_file(followers_json,user_id):
 
 
 def fetch_followers_data(url,payload,headers):
-    cnt = 0
+    fetched_followers = 0
+    followers_count = fetch_followers_count(headers)
+
     while True:
         followers_json = []
         response = requests.get(url,
                                 params=payload,headers=headers)
         if response.status_code == 429:
+            fetched_followers += 15000
+            show_progress(followers_count,fetched_followers)
             time.sleep(60*15)
             return fetch_followers_data(url,payload,headers)
 
@@ -104,9 +136,12 @@ def main():
     payload = create_params()
     headers = create_headers(bearer_token)
 
+
     followers_json = fetch_followers_data(url,payload,headers)
 
+    return None
 
 
 if __name__ == "__main__":
     main()
+
