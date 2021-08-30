@@ -66,7 +66,11 @@ def fetch_liked_tweets(url,payload,headers):
     cnt = 0
     while True:
         liked_tweets_json = []
-        response = requests.get(url,params=payload,headers=headers)
+        response = requests.get(url,
+                                params=payload,headers=headers)
+        if response.status_code == 429:
+            time.sleep(60*15)
+            fetch_liked_tweets(url,payload,headers)
         json_res = response.json()
 
         if response.status_code != 200:
@@ -76,14 +80,17 @@ def fetch_liked_tweets(url,payload,headers):
                 )
             )
 
-        liked_tweets_json.append(json_res['data'])
-        payload.update(pagination_token=json_res['meta']['next_token'])
-        print(json_res['meta']['next_token'])
-        save_file(liked_tweets_json,user_id)
-        cnt += 1
-        if cnt == 15:
-            time.sleep(60*15)
-            cnt = 0
+        try:
+            liked_tweets_json.append(json_res['data'])
+            save_file(liked_tweets_json,user_id)
+        except KeyError:
+            print("=====DONE=====")
+            break
+
+        if 'next_token' in json_res['meta']:
+            payload.update(pagination_token=json_res['meta']['next_token'])
+
+        else: break
 
     return None
 
