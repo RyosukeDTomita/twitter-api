@@ -1,9 +1,9 @@
 ##########################################################################
-# Name: monitor_timeline.py
+# Name: fetch_timeline.py
 #
-# Using Twitter API fetch follower list.
+# Using Twitter API fetch use's timeline data.
 #
-# Usage: python3 test.py -i 920511017683247104
+# Usage: python3 fetch_timeline.py -i 920511017683247104
 #
 # Author: Ryosuke Tomita
 # Date: 2021/08/26
