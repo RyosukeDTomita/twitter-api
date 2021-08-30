@@ -69,10 +69,7 @@ def fetch_user_timeline(url,payload,headers):
                 response.status_code, response.text
             )
         )
-    try:
-        timeline_json.append(json_res['data'])
-    except: KeyError:
-        break
+    timeline_json.append(json_res['data'])
     return timeline_json
 
 

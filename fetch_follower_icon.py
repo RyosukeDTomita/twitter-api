@@ -58,6 +58,7 @@ def create_headers(bearer_token):
 def fetch_followers_data(url,payload,headers):
     response = requests.get(url,params=payload,headers=headers,
                             timeout=3)
+
     if response.status_code == 429:
         time.sleep(60*15)
         return fetch_followers_data(url,payload,headers)
@@ -94,6 +95,7 @@ def main():
         user_object_json = fetch_followers_data(url,payload,headers)
         try:
             icon_src = user_object_json['profile_image_url']
+            if not icon_src: continue
         except KeyError:
             continue
 
