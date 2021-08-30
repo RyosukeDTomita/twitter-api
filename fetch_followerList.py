@@ -41,6 +41,7 @@ def create_headers(bearer_token):
                "User-Agent": select_user_agent()}
     return headers
 
+
 def select_user_agent():
     user_agents = []
     user_agents.append("Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.0) Opera 12.14")
@@ -57,7 +58,7 @@ def select_user_agent():
 def save_file(followers_json,user_id):
     save_file = (user_id + '_' + 'followers_data.csv')
     with open(save_file,mode="a") as f:
-        [f.write("{0},{1},{2},https://twitter.com/intent/user?user_id={1}\n".format(j['name'],j['id'],j['username'])) for i in followers_json for j in i]
+        [f.write("{0},{1},{2},https://twitter.com/intent/user?user_id={1}\n".format(j['name'].replace(',',''),j['id'],j['username'])) for i in followers_json for j in i]
 
 
 def fetch_followers_data(url,payload,headers):
