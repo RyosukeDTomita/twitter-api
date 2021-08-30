@@ -64,6 +64,9 @@ def save_file(followers_json,user_id):
 def fetch_followers_data(url,payload,headers):
     response = requests.get(url,params=payload,headers=headers,
                             timeout=3)
+    if response.status_code == 429:
+        time.sleep(60*15)
+        return fetch_followers_data(url,payload,headers)
     json_res = response.json()
     print(json_res)
     if response.status_code != 200:
