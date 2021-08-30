@@ -77,9 +77,13 @@ def show_progress(max_data_size,fetched_data_size):
     progressed_percent = fetched_data_size/max_data_size
     bar_cnt = int(max_bar_length * progressed_percent)
     dot_cnt = max_bar_length - bar_cnt
-    print('\033[32m',bar*bar_cnt + dot * dot_cnt,'\033[0m',
-          '\033[31m','[{:.1f}%]'.format(progressed_percent*100),
-          '\033[0m')
+    wait_time = (1-progressed_percent) * max_data_size/15000 *15
+
+    print("LEFT TIME IS {:.3f} min.    {}/{}"
+          .format(wait_time,fetched_data_size,max_data_size))
+    print('\033[32m',bar*bar_cnt + dot * dot_cnt,
+          '\033[0m',end="")
+    print('\033[31m','[{:>5.1f}%]'.format(progressed_percent*100),          '\033[0m')
     return None
 
 
