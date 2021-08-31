@@ -17,6 +17,7 @@ import argparse
 import time
 import pandas as pd
 import numpy as np
+import shutil
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -55,13 +56,33 @@ def create_headers(bearer_token):
     return headers
 
 
-def fetch_followers_data(url,payload,headers):
+def show_progress(max_data_size,fetched_data_size):
+    terminal_size = shutil.get_terminal_size().columns
+    max_bar_length = terminal_size - 12
+
+    bar,dot = "#","."
+    progressed_percent = fetched_data_size/max_data_size
+    bar_cnt = int(max_bar_length * progressed_percent)
+    dot_cnt = max_bar_length - bar_cnt
+    wait_time = int((1-progressed_percent)*max_data_size/300)*15
+
+    print("LEFT TIME IS {:.0f} min.    {}/{}"
+          .format(wait_time,fetched_data_size,max_data_size))
+    print('\033[32m',bar*bar_cnt + dot * dot_cnt,
+          '\033[0m',end="")
+    print('\033[31m','[{:>5.1f}%]'.format(progressed_percent*100),
+          '\033[0m')
+    return None
+
+
+def fetch_followers_data(url,payload,headers,df_length,i):
     response = requests.get(url,params=payload,headers=headers,
                             timeout=3)
 
     if response.status_code == 429:
+        show_progress(df_length,i)
         time.sleep(60*15)
-        return fetch_followers_data(url,payload,headers)
+        return fetch_followers_data(url,payload,headers,df_length,i)
     json_res = response.json()
 
     if response.status_code != 200:
@@ -88,16 +109,20 @@ def main():
     bearer_token = load_bearer_token()
     headers = create_headers(bearer_token)
 
+    df_length = len(df['id'])
+
     for i,user_id in enumerate(df['id']):
         if not user_id: continue
         print(user_id)
         payload = create_params(user_id)
-        user_object_json = fetch_followers_data(url,payload,headers)
+        user_object_json = fetch_followers_data(url,payload,
+                                            headers,df_length,i)
         try:
             icon_src = user_object_json['profile_image_url']
             if not icon_src: continue
         except KeyError:
             continue
+
 
         img_dl(icon_src,df['id'][i])
 
