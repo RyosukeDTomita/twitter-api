@@ -43,6 +43,7 @@ def create_headers(bearer_token):
                "User-Agent": select_user_agent()}
     return headers
 
+
 def select_user_agent():
     user_agents = []
     user_agents.append("Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.0) Opera 12.14")
@@ -58,11 +59,16 @@ def select_user_agent():
 
 def fetch_user_timeline(url,payload,headers):
     response = requests.get(url,params=payload,headers=headers)
+
+
+    # When api rate limits, sleep.
     if response.status_code == 429:
         time.sleep(60)
         return fetch_user_timeline(url,payload,headers)
+
     json_res = response.json()
 
+    # display requests error message.
     if response.status_code != 200:
         raise Exception(
             "Request returned an error: {} {}".format(
@@ -74,7 +80,7 @@ def fetch_user_timeline(url,payload,headers):
 
 def save_file(tweet_json):
     save_file = (user_id + '_' + 'timeline_data.csv')
-    with open(save_file,mode="a") as f: # "a"でテキストの追記
+    with open(save_file,mode="a") as f:
         f.write("{0},{1},https://twitter.com/{2}/status/{0}\n".format(tweet_json['id'],tweet_json['text'],user_id))
 
 
@@ -85,6 +91,7 @@ def keep_monitoring(url,payload,headers):
         new_tweets_json = fetch_user_timeline(url,payload,headers)
         newTweetExist = False
 
+        # If new tweets are exist,prind stdin and save to file.
         for t in new_tweets_json:
             if t['id'] not in id_list:
                 id_list.append(t['id'])

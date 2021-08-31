@@ -106,30 +106,30 @@ def save_file(followers_json,user_id):
 
 def fetch_followers_data(url,payload,headers,
                          followers_count,fetched_followers):
-
     while True:
         followers_json = []
         response = requests.get(url,
                                 params=payload,headers=headers)
+
+        # When api rate limits, sleep 15min and see progress bar.
         if response.status_code == 429:
             fetched_followers += 15000
             show_progress(followers_count,fetched_followers)
             time.sleep(60*15)
             return fetch_followers_data(url,payload,headers,
-                                        followers_count,fetched_followers)
-
+                                followers_count,fetched_followers)
         display_requests_error(response)
-        json_res = response.json()
 
+        json_res = response.json()
         try:
             followers_json.append((json_res['data']))
             save_file(followers_json,user_id)
         except KeyError: break
 
+        # Remaining data is exist,update payload, request again
         if 'next_token' in json_res['meta']:
             payload.update(pagination_token=json_res['meta']['next_token'])
         else: break
-
     return None
 
 

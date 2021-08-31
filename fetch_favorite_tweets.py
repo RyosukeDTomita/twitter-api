@@ -110,12 +110,14 @@ def save_file(favourites_tweets_json,user_id):
     return None
 
 
-def fetch_liked_tweets(url,payload,headers,favourites_count,fetched_favourites_count):
+def fetch_liked_tweets(url,payload,headers,favourites_count,
+                       fetched_favourites_count):
     while True:
         favourites_tweets_json = []
         response = requests.get(url,
                                 params=payload,headers=headers)
 
+        # When api rate limits, sleep 15min and see progress bar.
         if response.status_code == 429:
             fetched_favourites_count += 1500
             show_progress(favourites_count,fetched_favourites_count)
@@ -133,6 +135,7 @@ def fetch_liked_tweets(url,payload,headers,favourites_count,fetched_favourites_c
             print("=====DONE=====")
             break
 
+        # Remaining data is exist,update payload, request again
         if 'next_token' in json_res['meta']:
             payload.update(pagination_token=json_res['meta']['next_token'])
         else: break

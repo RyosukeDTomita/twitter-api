@@ -37,6 +37,7 @@ def read_csv(csvfile):
                      usecols=(0,1,2),
                      names=('name','id','username'))
 
+    # avoid user_id is interpreted in exponantial.
     with open(csvfile,mode='r') as f:
         user_id_list = []
         for i in range(len(df)):
@@ -79,12 +80,14 @@ def fetch_followers_data(url,payload,headers,df_length,i):
     response = requests.get(url,params=payload,headers=headers,
                             timeout=3)
 
+    # When api rate limits, sleep 15min and see progress bar.
     if response.status_code == 429:
         show_progress(df_length,i)
         time.sleep(60*15)
         return fetch_followers_data(url,payload,headers,df_length,i)
     json_res = response.json()
 
+    # When response eroor occure, display error message.
     if response.status_code != 200:
         print("Request returned an error: {} {}".format(
               response.status_code, response.text))
@@ -98,6 +101,8 @@ def img_dl(icon_src,userid):
     DIRPATH = join(abspath(dirname(__file__)) + "/icon/")
     with open((DIRPATH+imgName),"wb") as f:
         f.write(img)
+    return None
+
 
 def main():
     args = parse_args()
@@ -109,7 +114,7 @@ def main():
     bearer_token = load_bearer_token()
     headers = create_headers(bearer_token)
 
-    df_length = len(df['id'])
+    df_length = len(df['id']) # data size.
 
     for i,user_id in enumerate(df['id']):
         if not user_id: continue
@@ -122,7 +127,6 @@ def main():
             if not icon_src: continue
         except KeyError:
             continue
-
 
         img_dl(icon_src,df['id'][i])
 
