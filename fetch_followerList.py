@@ -56,16 +56,26 @@ def select_user_agent():
     return(random_user_agent)
 
 
+def display_requests_error(response):
+    if response.status_code != 200:
+        raise Exception(
+            "Request returned an error: {} {}".format(
+                response.status_code, response.text
+            )
+        )
+    return None
+
+
 def fetch_followers_count(headers):
     params = {"user_id":user_id}
     url = 'https://api.twitter.com/1.1/users/show.json'
     response = requests.get(url,params=params,headers=headers,
                             timeout=3)
+    display_requests_error(response)
 
     followers_count = response.json()['followers_count']
     screen_name = response.json()['screen_name']
     print("{} has {} followers.".format(screen_name,followers_count))
-
     return followers_count
 
 
@@ -77,13 +87,14 @@ def show_progress(max_data_size,fetched_data_size):
     progressed_percent = fetched_data_size/max_data_size
     bar_cnt = int(max_bar_length * progressed_percent)
     dot_cnt = max_bar_length - bar_cnt
-    wait_time = (1-progressed_percent) * max_data_size/15000 *15
+    wait_time = int((1-progressed_percent)*max_data_size/15000)*15
 
-    print("LEFT TIME IS {:.3f} min.    {}/{}"
+    print("LEFT TIME IS {:.0f} min.    {}/{}"
           .format(wait_time,fetched_data_size,max_data_size))
     print('\033[32m',bar*bar_cnt + dot * dot_cnt,
           '\033[0m',end="")
-    print('\033[31m','[{:>5.1f}%]'.format(progressed_percent*100),          '\033[0m')
+    print('\033[31m','[{:>5.1f}%]'.format(progressed_percent*100),
+          '\033[0m')
     return None
 
 
@@ -93,8 +104,8 @@ def save_file(followers_json,user_id):
         [f.write("{0},{1},{2},https://twitter.com/intent/user?user_id={1}\n".format(j['name'].replace(',',''),j['id'],j['username'])) for i in followers_json for j in i]
 
 
-def fetch_followers_data(url,payload,headers,fetched_followers):
-    followers_count = fetch_followers_count(headers)
+def fetch_followers_data(url,payload,headers,
+                         followers_count,fetched_followers):
 
     while True:
         followers_json = []
@@ -105,16 +116,10 @@ def fetch_followers_data(url,payload,headers,fetched_followers):
             show_progress(followers_count,fetched_followers)
             time.sleep(60*15)
             return fetch_followers_data(url,payload,headers,
-                                        fetched_followers)
+                                        followers_count,fetched_followers)
 
+        display_requests_error(response)
         json_res = response.json()
-
-        if response.status_code != 200:
-            raise Exception(
-                "Request returned an error: {} {}".format(
-                    response.status_code, response.text
-                )
-            )
 
         try:
             followers_json.append((json_res['data']))
@@ -123,7 +128,6 @@ def fetch_followers_data(url,payload,headers,fetched_followers):
 
         if 'next_token' in json_res['meta']:
             payload.update(pagination_token=json_res['meta']['next_token'])
-
         else: break
 
     return None
@@ -139,7 +143,9 @@ def main():
     payload = create_params()
     headers = create_headers(bearer_token)
 
-    fetch_followers_data(url,payload,headers,fetched_followers=0)
+    followers_count = fetch_followers_count(headers)
+    fetch_followers_data(url,payload,headers,followers_count,
+                         fetched_followers=0)
 
     return None
 
