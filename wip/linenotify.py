@@ -25,7 +25,7 @@ def main():
     headers = {"Authorization" : "Bearer "+ token}
     message =  'これはテストです'
     payload = {"message" :  message}
-    png_path = abspath(join(dirname(__file__),"picture/twitter_bird.png"))
+    png_path = abspath(join(dirname(__file__),"/home/tomita/github/twitter-api/picture/twitter_bird.png"))
     print(png_path)
     files = {"imageFile": open(png_path, "rb")}
 

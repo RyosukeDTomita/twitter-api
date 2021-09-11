@@ -76,7 +76,8 @@ def fetch_user_timeline(url,payload,headers):
 def save_file(followers_json,user_id):
     save_file = (user_id + '_' + 'timeline_data.csv')
     with open(save_file,mode="a") as f:
-        [f.write("{0},{1},https://twitter.com/{2}/status/{0}\n".format(j['id'],j['text'],user_id)) for i in followers_json for j in i]
+        #[f.write("{0},{1},https://twitter.com/{2}/status/{0}\n".format(j['id'],j['text'],user_id)) for i in followers_json for j in i]
+        [f.write("{0},https://twitter.com/{1}/status/{0}\n".format(j['id'],user_id)) for i in followers_json for j in i]
 
 
 def main():
