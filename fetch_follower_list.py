@@ -11,7 +11,7 @@
 ##########################################################################
 import argparse
 import os
-from os.path import dirname, join
+from os.path import abspath, dirname, join
 import random
 import shutil
 import time
@@ -50,10 +50,10 @@ def create_headers(bearer_token):
 
 def random_user_agent():
     """pick user_agent from useragents.txt randomly."""
-    user_agent_file = join(dirname(__file__) + "/useragents.txt")
+    user_agent_file = join(abspath(dirname(__file__)) + "/useragents.txt")
 
     with open(user_agent_file, mode="r") as f:
-        user_agent_list = f.readlines()
+        user_agent_list = [i.rstrip() for i in f.readlines()]
         user_agent = random.choice(user_agent_list)
     return user_agent
 
