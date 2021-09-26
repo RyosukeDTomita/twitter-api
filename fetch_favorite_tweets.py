@@ -1,14 +1,14 @@
 # coding: utf-8
-##########################################################################
-# Name: fetch_favorite_tweets.py
-#
-# Fetch selected user favorite tweets.
-#
-# Usage: python3 fetch_favorite_tweets.py -i <user_id>
-#
-# Author: Ryosuke Tomita
-# Date: 2021/08/26
-#########################################################################
+"""
+Name: fetch_favorite_tweets.py
+
+Fetch selected user's favorite tweets.
+
+Usage: python3 fetch_favorite_tweets.py -i <user_id>
+
+Author: Ryosuke Tomita
+Date: 2021/08/26
+"""
 import argparse
 import os
 from os.path import abspath, dirname, join
@@ -55,12 +55,14 @@ def random_user_agent():
 
 
 def create_headers(bearer_token):
+    """bearer_token is exported by .bashrc."""
     headers = {"Authorization": "Bearer {}".format(bearer_token),
                "User-Agent": random_user_agent()}
     return headers
 
 
 def display_requests_error(response):
+    """display error code and error message."""
     if response.status_code != 200:
         raise Exception(
             "Request returned an error: {} {}".format(
@@ -111,7 +113,12 @@ def save_file(favourites_tweets_json, user_id):
     """save favorited tweet data to csv."""
     csv_file = (user_id + '_' + 'favourites_tweets.csv')
     with open(csv_file, mode="a") as f:
-        [f.write("{0},{1},{2},https://twitter.com/{2}/status/{1}".format(j['text'], j['id'],j['author_id'])) for i in favourites_tweets_json for j in i]
+        [f.write(
+            "{0},{1},{2},https://twitter.com/{2}/status/{1}".format(
+                j['text'], j['id'],j['author_id']
+                )
+            )
+        for i in favourites_tweets_json for j in i]
 
 
 def fetch_liked_tweets(url, payload, headers, favourites_count,
@@ -147,6 +154,12 @@ def fetch_liked_tweets(url, payload, headers, favourites_count,
 
 
 def main():
+    """
+    1. Get target userid from stdin.
+    2. load token and create url, payload, headers.
+    3. Check target user's favorited tweets number.
+    4. Save all favorited tweets.
+    """
     args = parse_args()
     user_id = args['userid']
 

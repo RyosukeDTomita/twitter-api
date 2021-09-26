@@ -1,14 +1,14 @@
 # coding: utf-8
-#########################################################################
-# Name: fetch_follower_icon.py
-#
-# Using Twitter API fetch followers icon. FollowersList is able to set from argument.
-#
-# Usage:
-#
-# Author: Ryosuke Tomita
-# Date: 2021/08/26
-#########################################################################
+"""
+Name: fetch_follower_icon.py
+
+Using Twitter API fetch followers icon. FollowersList is able to set from argument.
+
+Usage:
+
+Author: Ryosuke Tomita
+Date: 2021/08/26
+"""
 import argparse
 import os
 from os.path import join, abspath, dirname
@@ -50,11 +50,13 @@ def read_csv(csvfile):
 
 
 def create_params(user_id):
+    """user_id is exported by .bashrc."""
     return {"user_id": user_id,
             "include_entities": "false"}
 
 
 def create_headers(bearer_token):
+    """bearer_token is exported by .bashrc."""
     headers = {"authorization": "Bearer {}".format(bearer_token)}
     return headers
 
@@ -76,7 +78,6 @@ def show_progress(max_data_size, fetched_data_size):
           '\033[0m', end="")
     print('\033[31m', '[{:>5.1f}%]'.format(progressed_percent*100),
           '\033[0m')
-    return None
 
 
 def fetch_followers_data(url, payload, headers, df_length, i):
@@ -106,10 +107,16 @@ def img_dl(icon_src, userid):
     dir_path = join(abspath(dirname(__file__)) + "/icon/")
     with open((dir_path + img_name), "wb") as f:
         f.write(img)
-    return None
 
 
 def main():
+    """
+    1. Get csvfile path from stdin.
+    2. Read csvfile as DataFrame.
+    3. Create url, bearer_token, headers.
+    4. Check csvfile length to know the number of download icons.
+    5. Download user's icons.
+    """
     args = parse_args()
 
     csv_file = args['file']
@@ -121,15 +128,18 @@ def main():
 
     df_length = len(df['id'])  # data size.
 
+    # download icon jpg file.
     for i, user_id in enumerate(df['id']):
-        if not user_id: continue
+        if not user_id:
+            continue
         print(user_id)
         payload = create_params(user_id)
         user_object_json = fetch_followers_data(url, payload,
                                             headers, df_length, i)
         try:
             icon_src = user_object_json['profile_image_url']
-            if not icon_src: continue
+            if not icon_src:
+                continue
         except KeyError:
             continue
 

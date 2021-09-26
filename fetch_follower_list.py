@@ -1,14 +1,14 @@
 # coding: utf-8
-##########################################################################
-# Name: fetch_followerList.py
-#
-# Using Twitter API fetch follower list.
-#
-# Usage: python3 fetch_followerList.py -i 920511017683247104
-#
-# Author: Ryosuke Tomita
-# Date: 2021/08/26
-##########################################################################
+"""
+Name: fetch_followerList.py
+
+Using Twitter API fetch follower list.
+
+Usage: python3 fetch_followerList.py -i 920511017683247104
+
+Author: Ryosuke Tomita
+Date: 2021/08/26
+"""
 import argparse
 import os
 from os.path import abspath, dirname, join
@@ -38,11 +38,13 @@ def create_url(user_id):
 
 
 def create_params():
+    """max_results max == 1000"""
     return {"user.fields": "created_at",
             "max_results": "1000"}
 
 
 def create_headers(bearer_token):
+    """create header. bearer_token is exported by .bashrc."""
     headers = {"Authorization": "Bearer {}".format(bearer_token),
                "User-Agent": random_user_agent()}
     return headers
@@ -104,7 +106,12 @@ def save_file(followers_json, user_id):
     """save to csvfile. csvfile name contains target user_id"""
     csv_file = (user_id + '_' + 'followers_data.csv')
     with open(csv_file, mode="a") as f:
-        [f.write("{0}, {1}, {2}, https://twitter.com/intent/user?user_id={1}\n".format(j['name'].replace(',', ''), j['id'], j['username'])) for i in followers_json for j in i]
+        [f.write(
+            "{0}, {1}, {2}, https://twitter.com/intent/user?user_id={1}\n".format(
+                j['name'].replace(',', ''), j['id'], j['username']
+            )
+        )
+        for i in followers_json for j in i]
 
 
 def fetch_followers_data(url, payload, headers,
@@ -137,6 +144,12 @@ def fetch_followers_data(url, payload, headers,
 
 
 def main():
+    """
+    1. Get userid from stdin.
+    2. Load token and create payload,url,header.
+    3. Check target user's followers number.
+    4. Fetch followers data.
+    """
     args = parse_args()
     user_id = args['userid']
 
@@ -146,6 +159,7 @@ def main():
     headers = create_headers(bearer_token)
 
     followers_count = fetch_followers_count(headers, user_id)
+
     fetch_followers_data(url, payload, headers, followers_count, user_id,
                          fetched_followers=0)
 

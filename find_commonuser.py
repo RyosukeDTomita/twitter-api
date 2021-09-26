@@ -1,13 +1,14 @@
-##########################################################################
-# Name: find_commonuser.py
-#
-# Compare followers lists and find same user.
-#
-# Usage: python3 find_commonuser.py -f <csv>
-#
-# Author: Ryosuke Tomita
-# Date: 2021/08/27
-##########################################################################
+# coding: utf-8
+"""
+Name: find_commonuser.py
+
+Compare followers lists and find same user.
+
+Usage: python3 find_commonuser.py -f <csv>
+
+Author: Ryosuke Tomita
+ Date: 2021/08/27
+"""
 import argparse
 import pandas as pd
 
@@ -74,6 +75,12 @@ def save_file(common_user):
 
 
 def main():
+    """
+    1. Set user's lists(csv) path from stdin.
+    2. Read csv file and find minimum file.
+    3. Compare csv file and find common user.
+    4. Save common_user to csv.
+    """
     files = parse_args()
 
     df_list = [read_csv(f) for f in files]

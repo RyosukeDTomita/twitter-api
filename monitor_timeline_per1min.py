@@ -1,14 +1,14 @@
 # coding: utf-8
-##########################################################################
-# Name: monitor_timeline_per1min.py
-#
-# Using Twitter API fetch follower list.
-#
-# Usage: python3 monitor_timeline_per1min.py -i <user_id>
-#
-# Author: Ryosuke Tomita
-# Date: 2021/08/26
-##########################################################################
+"""
+Name: monitor_timeline_per1min.py
+
+Using Twitter API fetch follower list.
+
+Usage: python3 monitor_timeline_per1min.py -i <user_id>
+
+Author: Ryosuke Tomita
+Date: 2021/08/26
+"""
 import argparse
 import os
 from os.path import abspath, join, dirname
@@ -57,6 +57,7 @@ def random_user_agent():
 
 
 def create_headers(bearer_token):
+    """bearer_token is exported by .bashrc."""
     headers = {"Authorization": "Bearer {}".format(bearer_token),
                "User-Agent": random_user_agent()}
     return headers
@@ -97,7 +98,7 @@ def keep_monitoring(url, payload, headers, user_id):
     while True:
         print("-----Scanning Target Tweet.-----")
         new_tweets_json = fetch_user_timeline(url, payload, headers)
-        newTweetExist = False
+        new_tweet_exist = False
 
         # If new tweets are exist,prind stdin and save to file.
         for tweet in new_tweets_json:
@@ -106,9 +107,9 @@ def keep_monitoring(url, payload, headers, user_id):
                 print("{}\n{}".format(tweet['text'],
                                       "="*shutil.get_terminal_size().columns))
                 save_file(tweet, user_id)
-                newTweetExist = True
+                new_tweet_exist = True
 
-        if not newTweetExist:
+        if not new_tweet_exist:
             print("-----No new Tweet------")
 
         print("-----Next Scan is 60s later.------")
@@ -116,6 +117,11 @@ def keep_monitoring(url, payload, headers, user_id):
 
 
 def main():
+    """
+    1. Set target userid from stdin.
+    2. Load token and create url, payload, headers.
+    3. Scan target user's timeline per 1min. If new tweets are exist, save to csvfile.
+    """
     args = parse_args()
     user_id = args['userid']
 
