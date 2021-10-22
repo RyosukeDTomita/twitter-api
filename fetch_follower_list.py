@@ -18,8 +18,15 @@ import time
 import requests
 
 
-def parse_args():
-    """set user_id from stdin."""
+def parse_args() -> dict:
+    """parse_args.
+    set user_id from stdin.
+
+    Args:
+
+    Returns:
+        dict:
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--userid", help="userid", type=str)
     p = parser.parse_args()
@@ -27,31 +34,68 @@ def parse_args():
     return args
 
 
-def load_bearer_token():
-    """BEARER_TOKEN is exported by .bashrc"""
+def load_bearer_token() -> str:
+    """load_bearer_token.
+    BEARER_TOKEN is exported by .bashrc
+
+    Args:
+
+    Returns:
+        str:
+    """
     return os.getenv("BEARER_TOKEN")
 
 
-def create_url(user_id):
-    """concat user_id to create url."""
+def create_url(user_id: str) -> str:
+    """create_url.
+    concat user_id to create url.
+
+    Args:
+        user_id (str): user_id
+
+    Returns:
+        str:
+    """
     return "https://api.twitter.com/2/users/{}/followers".format(user_id)
 
 
-def create_params():
-    """max_results max == 1000"""
+def create_params() -> dict:
+    """create_params.
+    max_results max == 1000
+
+    Args:
+
+    Returns:
+        dict:
+    """
     return {"user.fields": "created_at",
             "max_results": "1000"}
 
 
-def create_headers(bearer_token):
-    """create header. bearer_token is exported by .bashrc."""
+def create_headers(bearer_token: str) -> dict:
+    """create_headers.
+    create header. bearer_token is exported by .bashrc.
+
+    Args:
+        bearer_token (str): bearer_token
+
+    Returns:
+        dict:
+    """
     headers = {"Authorization": "Bearer {}".format(bearer_token),
                "User-Agent": random_user_agent()}
     return headers
 
 
-def random_user_agent():
-    """pick user_agent from useragents.txt randomly."""
+def random_user_agent() -> str:
+    """random_user_agent.
+    pick user_agent from useragents.txt randomly.
+
+    Args:
+
+    Returns:
+        str:
+    """
     user_agent_file = join(abspath(dirname(__file__)) + "/useragents.txt")
 
     with open(user_agent_file, mode="r") as f:
@@ -60,7 +104,12 @@ def random_user_agent():
     return user_agent
 
 
-def display_requests_error(response):
+def display_requests_error(response: requests.models.Response):
+    """display_requests_error.
+
+    Args:
+        response (requests.models.Response): response
+    """
     if response.status_code != 200:
         raise Exception(
             "Request returned an error: {} {}".format(
@@ -69,8 +118,17 @@ def display_requests_error(response):
         )
 
 
-def fetch_followers_count(headers, user_id):
-    """To dislpay progress bar, fetch user's the number of followers."""
+def fetch_followers_count(headers: dict, user_id: str) -> int:
+    """fetch_followers_count.
+    To dislpay progress bar, fetch user's the number of followers.
+
+    Args:
+        headers (dict): headers
+        user_id (str): user_id
+
+    Returns:
+        int:
+    """
     params = {"user_id": user_id}
     url = 'https://api.twitter.com/1.1/users/show.json'
     response = requests.get(url, params=params, headers=headers,
@@ -83,40 +141,63 @@ def fetch_followers_count(headers, user_id):
     return followers_count
 
 
-def show_progress(max_data_size, fetched_data_size):
-    """display progress bar and left time."""
+def show_progress(max_data_size: int, fetched_data_size: int):
+    """show_progress.
+    display progress bar and left time.
+
+    Args:
+        max_data_size (int): max_data_size
+        fetched_data_size (int): fetched_data_size
+    """
     terminal_size = shutil.get_terminal_size().columns
     max_bar_length = terminal_size - 12
 
-    bar, dot = "#", "."
+    bar_, dot = "#", "."
     progressed_percent = fetched_data_size/max_data_size
     bar_cnt = int(max_bar_length * progressed_percent)
     dot_cnt = max_bar_length - bar_cnt
-    wait_time = int((1-progressed_percent)*max_data_size/15000)*15
+    wait_time = -(-(1-progressed_percent)*max_data_size//15000)*15
 
     print("LEFT TIME IS {:.0f} min.    {}/{}"
           .format(wait_time, fetched_data_size, max_data_size))
-    print('\033[32m', bar*bar_cnt + dot * dot_cnt,
+    print('\033[32m', bar_*bar_cnt + dot * dot_cnt,
           '\033[0m', end="")
     print('\033[31m', '[{:>5.1f}%]'.format(progressed_percent*100),
           '\033[0m')
 
 
-def save_file(followers_json, user_id):
-    """save to csvfile. csvfile name contains target user_id"""
+def save_file(followers_json: list, user_id: str):
+    """save_file.
+    save to csvfile. csvfile name contains target user_id
+
+    Args:
+        followers_json (list): followers_json
+        user_id (str): user_id
+    """
     csv_file = (user_id + '_' + 'followers_data.csv')
     with open(csv_file, mode="a") as f:
-        [f.write(
-            "{0}, {1}, {2}, https://twitter.com/intent/user?user_id={1}\n".format(
-                j['name'].replace(',', ''), j['id'], j['username']
+        for i in followers_json:
+            for j in i:
+                f.write(
+                    "{0}, {1}, {2}, https://twitter.com/intent/user?user_id={1}\n".format(
+                        j['name'].replace(',', ''), j['id'], j['username']
             )
         )
-        for i in followers_json for j in i]
 
 
 def fetch_followers_data(url, payload, headers,
                          followers_count, user_id, fetched_followers):
-    """fetch user's all followers data. Data can be fetched 15000 per 15min."""
+    """fetch_followers_data.
+    fetch user's all followers data. Data can be fetched 15000 per 15min.
+
+    Args:
+        url:
+        payload:
+        headers:
+        followers_count:
+        user_id:
+        fetched_followers:
+    """
     while True:
         followers_json = []
         response = requests.get(url,
@@ -135,16 +216,18 @@ def fetch_followers_data(url, payload, headers,
         try:
             followers_json.append((json_res['data']))
             save_file(followers_json, user_id)
-        except KeyError: break
+        except KeyError:
+            break
 
         # Remaining data is exist,update payload, request again
         if 'next_token' in json_res['meta']:
             payload.update(pagination_token=json_res['meta']['next_token'])
-        else: break
+        else:
+            break
 
 
 def main():
-    """
+    """main
     1. Get userid from stdin.
     2. Load token and create payload,url,header.
     3. Check target user's followers number.

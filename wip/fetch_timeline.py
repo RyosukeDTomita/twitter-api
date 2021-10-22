@@ -10,7 +10,6 @@
 ##########################################################################
 import requests
 import os
-import json
 import time
 import random
 import argparse
@@ -56,21 +55,27 @@ def select_user_agent():
 
 
 def fetch_user_timeline(url,payload,headers):
-    timeline_json = []
-    response = requests.get(url,params=payload,headers=headers)
-    if response.status_code == 429:
-        time.sleep(60*15)
-        return fetch_user_timeline(url,payload,headers)
-    json_res = response.json()
+    while True:
+    #timeline_json = []
+        response = requests.get(url,params=payload,headers=headers)
+        if response.status_code == 429:
+            time.sleep(60*15)
+            return fetch_user_timeline(url,payload,headers)
+        json_res = response.json()
 
-    if response.status_code != 200:
-        raise Exception(
-            "Request returned an error: {} {}".format(
-                response.status_code, response.text
+        if response.status_code != 200:
+            raise Exception(
+                "Request returned an error: {} {}".format(
+                    response.status_code, response.text
+                )
             )
-        )
-    timeline_json.append(json_res['data'])
-    return timeline_json
+        print(json_res)
+        if 'next_token' in json_res['meta']:
+            payload.update(pagination_token=json_res['meta']['next_token'])
+        else:
+            break
+    #timeline_json.append(json_res['data'])
+    #return timeline_json
 
 
 def save_file(followers_json,user_id):
@@ -89,11 +94,12 @@ def main():
     payload = create_params()
     headers = create_headers(bearer_token)
 
-    timeline_json = fetch_user_timeline(url_tweets,payload,headers)
-    save_file(timeline_json,user_id)
+    #timeline_json = fetch_user_timeline(url_tweets,payload,headers)
+    fetch_user_timeline(url_tweets,payload,headers)
+    #save_file(timeline_json,user_id)
 
-    mentions_json = fetch_user_timeline(url_mensions,payload,headers)
-    save_file(mentions_json,user_id)
+    #mentions_json = fetch_user_timeline(url_mensions,payload,headers)
+    #save_file(mentions_json,user_id)
 
 
 if __name__ == "__main__":
